@@ -6,7 +6,7 @@ We propose an effective STL synthesis framework - Model Predictive Control for S
 This project consists of two parts, online part and offline part, which are conducted by Python 3 and Julia respectively.
 
 - We compared computational efficiency by two ways, with Time Interval Decomposition (TID) and without TID. Both codes can be found in folders `online codes - with TID` and `online codes - without TID` respectively.
-- For the offline part, you can check the final terminal set by figure `offline codes/terminalSetFigure.png` and see some of "intermediate product" by animation `animation.gif`. Note that the offline results shown in the figure and animation is the projection to 2 dimensions and you can also plot them in other dimensions by your own.
+- For the offline part, you can check the final terminal set by figure `offline codes/terminalSetFigure.png` and see some of "intermediate product" by animation `offline codes/animation.gif`. Note that the offline results shown in the figure and animation is the projection to 2 dimensions and you can also plot them in other dimensions by your own.
 
 #### Dependencies
 
