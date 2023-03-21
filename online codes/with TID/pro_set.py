@@ -32,7 +32,7 @@ def Set_Prob(curr_t, disturb_set, len_stl, stage):
     
     # add optimize function
     obj = Add_obj(model, z, u, len_disturb_set, len_stl, stage)
-
+    print(model)
     model.optimize()
     if model.status == GRB.Status.OPTIMAL:
         state = model.getAttr('x', z)
@@ -79,8 +79,8 @@ def add_model_constrs_with_disturb(model, z, u, curr_t, disturb_set, len_disturb
 def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, stage):
     if stage == 0:
         # -----Eventually temporal operator--------F0[0,7] A1------------
-        F0 = model.addVars(len_disturb_set*(F0_t+1), 1, vtype=GRB.BINARY, name="F0C")
-        F0_4 = model.addVars(len_disturb_set*(F0_t+1), 4, vtype=GRB.BINARY, name="F0_4")
+        F0 = model.addVars(len_disturb_set*(F0_t + 1), 1, lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F0C")
+        F0_4 = model.addVars(len_disturb_set*(F0_t + 1), 4, vtype = GRB.BINARY, name="F0_4")
         for j in range(len_disturb_set):
             # the model need to satisfy the constraints only in one step
             model.addConstr((sum(F0[i + j*(F0_t+1), 0] for i in range(F0_t+1)) >= 1), 'F0')
@@ -102,7 +102,7 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, stage):
         
     if (stage == 1):
         # -----Eventually temporal operator--------F1[22,25] A2------------
-        F1 = model.addVars(len_disturb_set*(F1_t+1), 1, vtype=GRB.BINARY, name="F1C")
+        F1 = model.addVars(len_disturb_set*(F1_t+1), 1,  lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F1C")
         F1_4 = model.addVars(len_disturb_set*(F1_t+1), 4, vtype=GRB.BINARY, name="F1_4")
         for j in range(len_disturb_set):
             # the model need to satisfy the constraints only in one step
@@ -120,7 +120,7 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, stage):
             model.addConstrs((-z[j*(len_stl+1) + F1_tmin - spl_t[stage] + i, 1] + yA2[1] <= M * F1_4[i + j * (F1_t+1), 3] for i in range(F1_t+1)), 'F11')
             model.addConstrs((z[j*(len_stl+1) + F1_tmin - spl_t[stage] + i, 1] - yA2[1] <= M * (1 - F1_4[i + j * (F1_t+1), 3]) for i in range(F1_t+1)), 'F12')
         
-        G1 = model.addVars(len_disturb_set * (G1_t + 1), 1, vtype=GRB.BINARY, name="G01")
+        G1 = model.addVars(len_disturb_set * (G1_t + 1), 1,  lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="G01")
         G1_4 = model.addVars(len_disturb_set * (G1_t + 1), 4, vtype=GRB.BINARY, name="G02")
         for j in range(len_disturb_set):
             # -------at every steps between G1_min to G1_max, the model should satisfy the constraints
