@@ -16,7 +16,6 @@ def Set_Prob_Robust(curr_t, input, len_stl):
         zz = model_robust.getAttr('x', zr)
         for i in range(len_stl+1):
             state.append([zz[i, 0], zz[i, 1], zz[i, 2], zz[i, 3]])
-        print("************", state)
         #printSolution(state)
         print(" it is feasible")
         return disturb, obj.X
