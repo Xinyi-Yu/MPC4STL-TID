@@ -27,13 +27,13 @@ class MPC:
         for i in range(self.len_stl+1):
             self.state.append([state[i, 0], state[i, 1], state[i, 2], state[i, 3]])
 
-        print("the objective function (stl robustness + input energy) equals to", obj)
-
+        #print("the objective function (stl robustness + input energy) equals to", obj)
+        return obj
 
 # check whether the input can satisfy all the disturbs and return the worst set of disturbs
     def check(self):
         disturb_var, obj = Set_Prob_Robust(self.cur_t, self.input, self.len_stl)
-        print("---------------the worst rho is ", obj,"----------------")
+        #print("---------------the worst rho is ", obj,"----------------")
         return disturb_var, obj
 
 
