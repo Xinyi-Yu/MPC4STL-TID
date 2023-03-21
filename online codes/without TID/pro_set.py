@@ -70,7 +70,7 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, curr_t):
         stage = 1
     if stage == 0:
         # consider F0 and F1 formulae
-        F0 = model.addVars(len_disturb_set*(F0_t+1), 1, vtype=GRB.BINARY, name="F0C")
+        F0 = model.addVars(len_disturb_set*(F0_t+1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F0C")
         F0_4 = model.addVars(len_disturb_set*(F0_t+1), 4, vtype=GRB.BINARY, name="F0_4")
         for j in range(len_disturb_set):
             model.addConstr((sum(F0[i + j*(F0_t+1), 0] for i in range(F0_t+1)) >= 1), 'F0')
@@ -87,7 +87,7 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, curr_t):
             model.addConstrs((-z[j*(len_stl+1) + i, 1] + yA1[1] <= M * F0_4[i + j * (F0_t+1), 3] for i in range(F0_t+1)), 'F00')
             model.addConstrs((z[j*(len_stl+1) + i, 1] - yA1[1] <= M * (1 - F0_4[i + j * (F0_t+1), 3]) for i in range(F0_t+1)), 'F01')
             model.update()
-        F1 = model.addVars(len_disturb_set*(F1_t+1), 1, vtype=GRB.BINARY, name="F1C")
+        F1 = model.addVars(len_disturb_set*(F1_t+1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F1C")
         F1_4 = model.addVars(len_disturb_set*(F1_t+1), 4, vtype=GRB.BINARY, name="F1_4")
         for j in range(len_disturb_set):
             model.addConstr((sum(F1[i + j*(F1_t+1), 0] for i in range(F1_t+1)) >= 1), 'F11')
@@ -103,7 +103,7 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, curr_t):
             model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 1] + yA2[1] <= M * F1_4[i + j * (F1_t+1), 3] for i in range(F1_t+1)), 'F11')
             model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 1] - yA2[1] <= M * (1 - F1_4[i + j * (F1_t+1), 3]) for i in range(F1_t+1)), 'F12')
     if (stage == 1):
-        F1 = model.addVars(len_disturb_set*(F1_t+1), 1, vtype=GRB.BINARY, name="F1C")
+        F1 = model.addVars(len_disturb_set*(F1_t+1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F1C")
         F1_4 = model.addVars(len_disturb_set*(F1_t+1), 4, vtype=GRB.BINARY, name="F1_4")
         for j in range(len_disturb_set):
             model.addConstr((sum(F1[i + j*(F1_t+1), 0] for i in range(F1_t+1)) >= 1), 'F11')
@@ -119,7 +119,7 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, curr_t):
             model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 1] + yA2[1] <= M * F1_4[i + j * (F1_t+1), 3] for i in range(F1_t+1)), 'F11')
             model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 1] - yA2[1] <= M * (1 - F1_4[i + j * (F1_t+1), 3]) for i in range(F1_t+1)), 'F12')
     if (curr_t <= G1_tmax):
-        G1 = model.addVars(len_disturb_set * (G1_t + 1), 1, vtype=GRB.BINARY, name="G01")
+        G1 = model.addVars(len_disturb_set * (G1_t + 1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="G01")
         G1_4 = model.addVars(len_disturb_set * (G1_t + 1), 4, vtype=GRB.BINARY, name="G02")
         for j in range(len_disturb_set):
             model.addConstrs((G1[i + j * (G1_t + 1), 0] == 1 for i in range(G1_t + 1)), 'G03')
