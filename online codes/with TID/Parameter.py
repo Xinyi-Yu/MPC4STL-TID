@@ -35,3 +35,5 @@ optimal_control_sequence = []
 # terminal sets area
 x_t = [0, 5.449]
 y_t = [0, 5.449]
+
+reps = 20
