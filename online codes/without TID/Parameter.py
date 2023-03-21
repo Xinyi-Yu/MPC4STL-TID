@@ -30,3 +30,4 @@ G1_t = G1_tmax - G1_tmin
 z0 = [3, 8, 0, 0]    # the initial states
 optimal_state_sequence = [z0]
 optimal_control_sequence = []
+reps = 20
