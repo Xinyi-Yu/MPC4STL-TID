@@ -157,7 +157,7 @@ def Add_obj(model, z, u, len_disturb_set, len_stl, curr_t):
                 model.addConstr((temp_G1[i + j*(G1_t + 1), 3] == yA3[1] - z[G1_tmin + i + j*(len_stl+1), 1]), "temp1")
             for i in range(G1_t + 1):
                 model.addGenConstrMin(rho_G1_temp[i + j * (G1_t + 1), 0], [temp_G1[i + j * (G1_t + 1), p] for p in range(4)], name="minconstr")
-            model.addGenConstrMax(rho_G1[j, 0], [rho_G1_temp[i + j*(G1_t + 1), 0] for i in range(G1_t + 1)], name="minconstr")
+            model.addGenConstrMin(rho_G1[j, 0], [rho_G1_temp[i + j*(G1_t + 1), 0] for i in range(G1_t + 1)], name="minconstr")
     if stage == 0:
         temp_F0 = model.addVars((F0_t + 1)* len_disturb_set, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
         rho_F0_temp = model.addVars((F0_t + 1)* len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F0_temp")
