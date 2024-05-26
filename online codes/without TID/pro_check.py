@@ -46,19 +46,9 @@ def add_model_constrs_robust(model_robust, input, zr, w, curr_t, len_stl):
     model_robust.addConstrs((zr[i, 2] <= vmax for i in range(curr_t, len_stl + 1)), 'Speed2')
     model_robust.addConstrs((-vmax <= zr[i, 3] for i in range(curr_t, len_stl + 1)), 'Speed3')
     model_robust.addConstrs((zr[i, 3] <= vmax for i in range(curr_t, len_stl + 1)), 'Speed4')
-    model_robust.update()
-    
 
 def Add_obj_robust(model_robust, zr, curr_t):
-    if curr_t > F0_t:
-        stage = 1
-    else:
-        stage = 0
     if curr_t <= G1_tmax:
-        bool_G = 1
-    else:
-        bool_G = 0
-    if bool_G == 1:
         temp_G1 = model_robust.addVars(G1_t + 1, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
         rho_G1_temp = model_robust.addVars(G1_t + 1, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_G1_temp")
         rho_G1 = model_robust.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_G1")
@@ -71,7 +61,7 @@ def Add_obj_robust(model_robust, zr, curr_t):
             model_robust.addGenConstrMin(rho_G1_temp[i, 0], [temp_G1[i, j] for j in range(4)], name="minconstr")
         #model_robust.addGenConstrMax(rho_G1, [rho_G1_temp[i, 0] for i in range(G1_t + 1)], name="minconstr")
         model_robust.addGenConstrMin(rho_G1, [rho_G1_temp[i, 0] for i in range(G1_t + 1)], name="minconstr2")
-    if stage == 0:
+    if curr_t <= F0_t:
         # F[0,6]A1
         temp_F0 = model_robust.addVars(F0_t + 1, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
         rho_F0_temp = model_robust.addVars(F0_t + 1, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F0_temp")
@@ -85,37 +75,23 @@ def Add_obj_robust(model_robust, zr, curr_t):
             model_robust.addGenConstrMin(rho_F0_temp[i, 0], [temp_F0[i, j] for j in range(4)], name="minconstr1")
         model_robust.addGenConstrMax(rho_F0, [rho_F0_temp[i, 0] for i in range(F0_t + 1)], name="minconstr2")
 
-        temp_F1 = model_robust.addVars(F1_t + 1, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
-        rho_F1_temp = model_robust.addVars(F1_t + 1, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1_temp")
-        rho_F1 = model_robust.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1")
-        for i in range(F1_t + 1):
-            model_robust.addConstr((temp_F1[i, 0] == zr[F1_tmin  + i, 0] - xA2[0]), "temp1")
-            model_robust.addConstr((temp_F1[i, 1] == xA2[1] - zr[F1_tmin + i, 0]), "temp1")
-            model_robust.addConstr((temp_F1[i, 2] == zr[F1_tmin + i, 1] - yA2[0]), "temp1")
-            model_robust.addConstr((temp_F1[i, 3] == yA2[1] - zr[F1_tmin + i, 1]), "temp1")
-        for i in range(F1_t + 1):
-            model_robust.addGenConstrMin(rho_F1_temp[i, 0], [temp_F1[i, j] for j in range(4)], name="minconstr")
-        model_robust.addGenConstrMax(rho_F1, [rho_F1_temp[i, 0] for i in range(F1_t + 1)], name="maxconstr")
-
-    if stage == 1:
-        # F[22,25]A2
-        temp_F1 = model_robust.addVars(F1_t + 1, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
-        rho_F1_temp = model_robust.addVars(F1_t + 1, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1_temp")
-        rho_F1 = model_robust.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1")
-        for i in range(F1_t + 1):
-            model_robust.addConstr((temp_F1[i, 0] == zr[F1_tmin + i, 0] - xA2[0]), "temp1")
-            model_robust.addConstr((temp_F1[i, 1] == xA2[1] - zr[F1_tmin + i, 0]), "temp1")
-            model_robust.addConstr((temp_F1[i, 2] == zr[F1_tmin + i, 1] - yA2[0]), "temp1")
-            model_robust.addConstr((temp_F1[i, 3] == yA2[1] - zr[F1_tmin + i, 1]), "temp1")
-        for i in range(F1_t + 1):
-            model_robust.addGenConstrMin(rho_F1_temp[i, 0], [temp_F1[i, j] for j in range(4)], name="minconstr")
-        model_robust.addGenConstrMax(rho_F1, [rho_F1_temp[i, 0] for i in range(F1_t + 1)], name="maxconstr")
+    temp_F1 = model_robust.addVars(F1_t + 1, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
+    rho_F1_temp = model_robust.addVars(F1_t + 1, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1_temp")
+    rho_F1 = model_robust.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1")
+    for i in range(F1_t + 1):
+        model_robust.addConstr((temp_F1[i, 0] == zr[F1_tmin  + i, 0] - xA2[0]), "temp1")
+        model_robust.addConstr((temp_F1[i, 1] == xA2[1] - zr[F1_tmin + i, 0]), "temp1")
+        model_robust.addConstr((temp_F1[i, 2] == zr[F1_tmin + i, 1] - yA2[0]), "temp1")
+        model_robust.addConstr((temp_F1[i, 3] == yA2[1] - zr[F1_tmin + i, 1]), "temp1")
+    for i in range(F1_t + 1):
+        model_robust.addGenConstrMin(rho_F1_temp[i, 0], [temp_F1[i, j] for j in range(4)], name="minconstr")
+    model_robust.addGenConstrMax(rho_F1, [rho_F1_temp[i, 0] for i in range(F1_t + 1)], name="maxconstr")
 
     obj = model_robust.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho")
-    if stage == 0:
+    if curr_t <= F0_t:
         model_robust.addGenConstrMin(obj, [rho_F0, rho_G1, rho_F1], name="minconstr")
     else:
-        if stage == 1 & bool_G:
+        if stage == 1 &  curr_t <= G1_tmax:
             model_robust.addGenConstrMin(obj, [rho_F1, rho_G1], name="minconstr")
         else:
             model_robust.addConstr(obj == rho_F1,  name="minconstr")
