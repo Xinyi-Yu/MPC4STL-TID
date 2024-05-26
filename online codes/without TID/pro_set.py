@@ -65,10 +65,6 @@ def add_model_constrs_with_disturb(model, z, u, curr_t, disturb_set, len_disturb
     
 def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, curr_t):
     if curr_t <= F0_t:
-        stage = 0
-    else:
-        stage = 1
-    if stage == 0:
         # consider F0 and F1 formulae
         F0 = model.addVars(len_disturb_set*(F0_t+1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F0C")
         F0_4 = model.addVars(len_disturb_set*(F0_t+1), 4, vtype=GRB.BINARY, name="F0_4")
@@ -77,7 +73,6 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, curr_t):
             for i in range(F0_t+1):
                 model.addConstrs((F0[i + j*(F0_t+1), 0] <= F0_4[i + j*(F0_t+1), p] for p in range(4)), 'F2')
                 model.addConstr((sum(F0_4[i + j*(F0_t+1), p] for p in range(4)) - 3 <= F0[i + j*(F0_t+1), 0]), 'F3')
-                model.update()
             model.addConstrs((z[j*(len_stl+1) + i, 0] - xA1[0] <= M * F0_4[i + j*(F0_t+1), 0] for i in range(F0_t+1)), 'F4')
             model.addConstrs((-z[j*(len_stl+1) + i, 0] + xA1[0] <= M * (1 - F0_4[i + j*(F0_t+1), 0]) for i in range(F0_t+1)), 'F5')
             model.addConstrs((-z[j*(len_stl+1) + i, 0] + xA1[1] <= M * F0_4[i + j*(F0_t+1), 1] for i in range(F0_t+1)), 'F6')
@@ -86,38 +81,22 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, curr_t):
             model.addConstrs((-z[j*(len_stl+1) + i, 1] + yA1[0] <= M * (1 - F0_4[i + j * (F0_t+1), 2]) for i in range(F0_t+1)), 'F9')
             model.addConstrs((-z[j*(len_stl+1) + i, 1] + yA1[1] <= M * F0_4[i + j * (F0_t+1), 3] for i in range(F0_t+1)), 'F00')
             model.addConstrs((z[j*(len_stl+1) + i, 1] - yA1[1] <= M * (1 - F0_4[i + j * (F0_t+1), 3]) for i in range(F0_t+1)), 'F01')
-            model.update()
-        F1 = model.addVars(len_disturb_set*(F1_t+1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F1C")
-        F1_4 = model.addVars(len_disturb_set*(F1_t+1), 4, vtype=GRB.BINARY, name="F1_4")
-        for j in range(len_disturb_set):
-            model.addConstr((sum(F1[i + j*(F1_t+1), 0] for i in range(F1_t+1)) >= 1), 'F11')
-            for i in range(F1_t+1):
-                model.addConstrs((F1[i + j*(F1_t+1), 0] <= F1_4[i + j*(F1_t+1), p] for p in range(4)), 'F12')
-                model.addConstr((sum(F1_4[i + j*(F1_t+1), p] for p in range(4)) - 3 <= F1[i + j*(F1_t+1), 0]), 'F13')
-            model.addConstrs((z[j*(len_stl+1) + F1_tmin + i , 0] - xA2[0] <= M * F1_4[i + j*(F1_t+1), 0] for i in range(F1_t+1)), 'F14')
-            model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 0] + xA2[0] <= M * (1 - F1_4[i + j*(F1_t+1), 0]) for i in range(F1_t+1)), 'F15')
-            model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 0] + xA2[1] <= M * F1_4[i + j*(F1_t+1), 1] for i in range(F1_t+1)), 'F16')
-            model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 0] - xA2[1] <= M * (1 - F1_4[i + j*(F1_t+1), 1]) for i in range(F1_t+1)), 'F17')
-            model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 1] - yA2[0] <= M * F1_4[i + j * (F1_t+1), 2] for i in range(F1_t+1)), 'F18')
-            model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 1] + yA2[0] <= M * (1 - F1_4[i + j * (F1_t+1), 2]) for i in range(F1_t+1)), 'F19')
-            model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 1] + yA2[1] <= M * F1_4[i + j * (F1_t+1), 3] for i in range(F1_t+1)), 'F11')
-            model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 1] - yA2[1] <= M * (1 - F1_4[i + j * (F1_t+1), 3]) for i in range(F1_t+1)), 'F12')
-    if (stage == 1):
-        F1 = model.addVars(len_disturb_set*(F1_t+1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F1C")
-        F1_4 = model.addVars(len_disturb_set*(F1_t+1), 4, vtype=GRB.BINARY, name="F1_4")
-        for j in range(len_disturb_set):
-            model.addConstr((sum(F1[i + j*(F1_t+1), 0] for i in range(F1_t+1)) >= 1), 'F11')
-            for i in range(F1_t+1):
-                model.addConstrs((F1[i + j*(F1_t+1), 0] <= F1_4[i + j*(F1_t+1), p] for p in range(4)), 'F12')
-                model.addConstr((sum(F1_4[i + j*(F1_t+1), p] for p in range(4)) - 3 <= F1[i + j*(F1_t+1), 0]), 'F13')
-            model.addConstrs((z[j*(len_stl+1) + F1_tmin + i , 0] - xA2[0] <= M * F1_4[i + j*(F1_t+1), 0] for i in range(F1_t+1)), 'F14')
-            model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 0] + xA2[0] <= M * (1 - F1_4[i + j*(F1_t+1), 0]) for i in range(F1_t+1)), 'F15')
-            model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 0] + xA2[1] <= M * F1_4[i + j*(F1_t+1), 1] for i in range(F1_t+1)), 'F16')
-            model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 0] - xA2[1] <= M * (1 - F1_4[i + j*(F1_t+1), 1]) for i in range(F1_t+1)), 'F17')
-            model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 1] - yA2[0] <= M * F1_4[i + j * (F1_t+1), 2] for i in range(F1_t+1)), 'F18')
-            model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 1] + yA2[0] <= M * (1 - F1_4[i + j * (F1_t+1), 2]) for i in range(F1_t+1)), 'F19')
-            model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 1] + yA2[1] <= M * F1_4[i + j * (F1_t+1), 3] for i in range(F1_t+1)), 'F11')
-            model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 1] - yA2[1] <= M * (1 - F1_4[i + j * (F1_t+1), 3]) for i in range(F1_t+1)), 'F12')
+    F1 = model.addVars(len_disturb_set*(F1_t+1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="F1C")
+    F1_4 = model.addVars(len_disturb_set*(F1_t+1), 4, vtype=GRB.BINARY, name="F1_4")
+    for j in range(len_disturb_set):
+        model.addConstr((sum(F1[i + j*(F1_t+1), 0] for i in range(F1_t+1)) >= 1), 'F11')
+        for i in range(F1_t+1):
+            model.addConstrs((F1[i + j*(F1_t+1), 0] <= F1_4[i + j*(F1_t+1), p] for p in range(4)), 'F12')
+            model.addConstr((sum(F1_4[i + j*(F1_t+1), p] for p in range(4)) - 3 <= F1[i + j*(F1_t+1), 0]), 'F13')
+        model.addConstrs((z[j*(len_stl+1) + F1_tmin + i , 0] - xA2[0] <= M * F1_4[i + j*(F1_t+1), 0] for i in range(F1_t+1)), 'F14')
+        model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 0] + xA2[0] <= M * (1 - F1_4[i + j*(F1_t+1), 0]) for i in range(F1_t+1)), 'F15')
+        model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 0] + xA2[1] <= M * F1_4[i + j*(F1_t+1), 1] for i in range(F1_t+1)), 'F16')
+        model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 0] - xA2[1] <= M * (1 - F1_4[i + j*(F1_t+1), 1]) for i in range(F1_t+1)), 'F17')
+        model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 1] - yA2[0] <= M * F1_4[i + j * (F1_t+1), 2] for i in range(F1_t+1)), 'F18')
+        model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 1] + yA2[0] <= M * (1 - F1_4[i + j * (F1_t+1), 2]) for i in range(F1_t+1)), 'F19')
+        model.addConstrs((-z[j*(len_stl+1) + F1_tmin + i, 1] + yA2[1] <= M * F1_4[i + j * (F1_t+1), 3] for i in range(F1_t+1)), 'F11')
+        model.addConstrs((z[j*(len_stl+1) + F1_tmin + i, 1] - yA2[1] <= M * (1 - F1_4[i + j * (F1_t+1), 3]) for i in range(F1_t+1)), 'F12')
+
     if (curr_t <= G1_tmax):
         G1 = model.addVars(len_disturb_set * (G1_t + 1), 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="G01")
         G1_4 = model.addVars(len_disturb_set * (G1_t + 1), 4, vtype=GRB.BINARY, name="G02")
@@ -137,15 +116,7 @@ def add_stl_constrs_binary(model, z, len_disturb_set, len_stl, curr_t):
 
 
 def Add_obj(model, z, u, len_disturb_set, len_stl, curr_t):
-    if curr_t <= F0_t:
-        stage = 0
-    else:
-        stage = 1
     if curr_t <= G1_tmax:
-        bool_G = 1
-    else:
-        bool_G = 0
-    if bool_G == 1:
         temp_G1 = model.addVars((G1_t + 1) * len_disturb_set, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
         rho_G1_temp = model.addVars((G1_t + 1) * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_G1_temp")
         rho_G1 = model.addVars(1 * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_G1")
@@ -155,61 +126,40 @@ def Add_obj(model, z, u, len_disturb_set, len_stl, curr_t):
                 model.addConstr((temp_G1[i + j*(G1_t + 1), 1] == xA3[1] - z[G1_tmin + i + j*(len_stl+1), 0]), "temp1")
                 model.addConstr((temp_G1[i + j*(G1_t + 1), 2] == z[G1_tmin + i + j*(len_stl+1), 1] - yA3[0]), "temp1")
                 model.addConstr((temp_G1[i + j*(G1_t + 1), 3] == yA3[1] - z[G1_tmin + i + j*(len_stl+1), 1]), "temp1")
-            for i in range(G1_t + 1):
                 model.addGenConstrMin(rho_G1_temp[i + j * (G1_t + 1), 0], [temp_G1[i + j * (G1_t + 1), p] for p in range(4)], name="minconstr")
             model.addGenConstrMin(rho_G1[j, 0], [rho_G1_temp[i + j*(G1_t + 1), 0] for i in range(G1_t + 1)], name="minconstr")
-    if stage == 0:
+    if curr_t <= F0_t:
         temp_F0 = model.addVars((F0_t + 1)* len_disturb_set, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
         rho_F0_temp = model.addVars((F0_t + 1)* len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F0_temp")
         rho_F0 = model.addVars(1 * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F0")
-        temp_F1 = model.addVars((F1_t + 1) * len_disturb_set, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
-        rho_F1_temp = model.addVars((F1_t + 1) * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1_temp")
-        rho_F1 = model.addVars(1 * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1")
-        model.update()
-    if stage == 1:
-        temp_F1 = model.addVars((F1_t + 1) * len_disturb_set, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
-        rho_F1_temp = model.addVars((F1_t + 1) * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1_temp")
-        rho_F1 = model.addVars(1 * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1")
+    temp_F1 = model.addVars((F1_t + 1) * len_disturb_set, 4, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="temp")
+    rho_F1_temp = model.addVars((F1_t + 1) * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1_temp")
+    rho_F1 = model.addVars(1 * len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho_F1")
+   
     for j in range(len_disturb_set):
         # F[0,5]A1
-        if stage == 0:
+        if curr_t <= F0_t:
             for i in range(F0_t + 1):
                 model.addConstr((temp_F0[i + j*(F0_t + 1), 0] == z[i + j*(len_stl+1), 0] - xA1[0]), "temp1")
                 model.addConstr((temp_F0[i + j*(F0_t + 1), 1] == xA1[1] - z[i + j*(len_stl+1), 0]), "temp1")
                 model.addConstr((temp_F0[i + j*(F0_t + 1), 2] == z[i + j*(len_stl+1), 1] - yA1[0]), "temp1")
                 model.addConstr((temp_F0[i + j*(F0_t + 1), 3] == yA1[1] - z[i + j * (len_stl + 1), 1]), "temp1")
-                model.update()
             for i in range(F0_t + 1):
                 model.addGenConstrMin(rho_F0_temp[i + j * (F0_t + 1), 0], [temp_F0[i + j * (F0_t + 1), p] for p in range(4)], name="minconstr")
             model.addGenConstrMax(rho_F0[j, 0], [rho_F0_temp[i + j*(F0_t + 1), 0] for i in range(F0_t + 1)], name="minconstr")
-            model.update()
-            for i in range(F1_t + 1):
-                model.addConstr((temp_F1[i + j * F1_t, 0] == z[i + F1_tmin + j * (len_stl + 1), 0] - xA2[0]), "temp1")
-                model.addConstr((temp_F1[i + j * F1_t, 1] == xA2[1] - z[i + F1_tmin + j * (len_stl + 1), 0]), "temp1")
-                model.addConstr((temp_F1[i + j * F1_t, 2] == z[i + F1_tmin + j * (len_stl + 1), 1] - yA2[0]), "temp1")
-                model.addConstr((temp_F1[i + j * F1_t, 3] == yA2[1] - z[i + F1_tmin + j * (len_stl + 1), 1]), "temp1")
-                model.update()
-            for i in range(F1_t + 1):
-                model.addGenConstrMin(rho_F1_temp[i + j * F1_t, 0], [temp_F1[i + j * F1_t, p] for p in range(4)], name="minconstr")
-            model.addGenConstrMax(rho_F1[j, 0], [rho_F1_temp[i + j * F1_t, 0] for i in range(F1_t + 1)], name="minconstr")
-            model.update()
-        if stage == 1:
-            for i in range(F1_t + 1):
-                model.addConstr((temp_F1[i + j * (F1_t + 1), 0] == z[i + F1_tmin + j * (len_stl + 1) , 0] - xA2[0]), "temp1")
-                model.addConstr((temp_F1[i + j * (F1_t + 1), 1] == xA2[1] - z[i + F1_tmin + j * (len_stl + 1) , 0]), "temp1")
-                model.addConstr((temp_F1[i + j * (F1_t + 1), 2] == z[i + F1_tmin + j * (len_stl + 1) , 1] - yA2[0]), "temp1")
-                model.addConstr((temp_F1[i + j * (F1_t + 1), 3] == yA2[1] - z[i + F1_tmin + j * (len_stl + 1) , 1]), "temp1")
-                model.update()
-            for i in range(F1_t + 1):
-                model.addGenConstrMin(rho_F1_temp[i + j * (F1_t + 1), 0], [temp_F1[i + j * (F1_t + 1), p] for p in range(4)], name="minconstr")
-            model.addGenConstrMax(rho_F1[j, 0], [rho_F1_temp[i + j * (F1_t + 1), 0] for i in range(F1_t + 1)], name="minconstr")
-            model.update()
+        for i in range(F1_t + 1):
+            model.addConstr((temp_F1[i + j * (F1_t + 1), 0] == z[i + F1_tmin + j * (len_stl + 1) , 0] - xA2[0]), "temp1")
+            model.addConstr((temp_F1[i + j * (F1_t + 1), 1] == xA2[1] - z[i + F1_tmin + j * (len_stl + 1) , 0]), "temp1")
+            model.addConstr((temp_F1[i + j * (F1_t + 1), 2] == z[i + F1_tmin + j * (len_stl + 1) , 1] - yA2[0]), "temp1")
+            model.addConstr((temp_F1[i + j * (F1_t + 1), 3] == yA2[1] - z[i + F1_tmin + j * (len_stl + 1) , 1]), "temp1")
+            model.addGenConstrMin(rho_F1_temp[i + j * (F1_t + 1), 0], [temp_F1[i + j * (F1_t + 1), p] for p in range(4)], name="minconstr")
+        model.addGenConstrMax(rho_F1[j, 0], [rho_F1_temp[i + j * (F1_t + 1), 0] for i in range(F1_t + 1)], name="minconstr")
     rho = model.addVars(len_disturb_set, 1, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="rho")
     for i in range(len_disturb_set):
-        if (stage == 0):
+        if (curr_t <= F0_t):
             model.addGenConstrMin(rho[i, 0], [rho_F0[i, 0], rho_G1[i, 0], rho_F1[i, 0]], name="minconstr")
         else:
-            if (stage == 1 & bool_G == 1):
+            if (curr_t > F0_t1 & curr_t <= G1_tmax):
                 model.addGenConstrMin(rho[i, 0], [rho_F1[i, 0], rho_G1[i, 0]], name="minconstr")
             else:
                 model.addConstr(rho[i, 0] == rho_F1[i, 0], name="minconstr4")
